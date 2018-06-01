@@ -1,0 +1,26 @@
+{
+  "name": "orbit-example",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "ipfs": "^0.29.1",
+    "orbit-db": "^0.19",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "react-redux": "^5.0.7",
+    "react-scripts": "1.1.4",
+    "redux-action-creator": "^2.3.0",
+    "redux-logger": "^3.0.6",
+    "redux-saga": "^0.16.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "redux-mock-store": "^1.5.1"
+  }
+}

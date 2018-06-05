@@ -1,27 +1,25 @@
 import { apply } from 'redux-saga/effects'
+import { expectSaga } from 'redux-saga-test-plan'
+import FeedStore from 'orbit-db-feedstore'
 
 import { loadThread } from '../'
 
-let thread = {
-  load: jest.fn(),
-  events: {
-    on: jest.fn()
-  }
-}
-let saga
+jest.mock('orbit-db-feedstore')
 
 describe('threads#load', () => {
-  beforeAll(() => {
-    saga = loadThread(thread)
-  });
+  it('loads thread and binds events', () => {
+    let thread = new FeedStore()
+    thread.events = {
+      on: jest.fn()
+    }
 
-  it('loads thread', () => {
-    expect(saga.next(thread).value)
-      .toEqual(apply(thread, thread.load))
-  })
-
-  it('binds an events', () => {
-    expect(thread.events.on.mock.calls.map(c => c[0]))
-      .toEqual([ 'ready', 'write', 'replicated' ])
+    return expectSaga(loadThread, thread)
+      .apply(thread, thread.load)
+      .run()
+      .then(() => {
+        // Checking binded events
+        expect(thread.events.on.mock.calls.map(c => c[0]))
+           .toEqual([ 'ready', 'write', 'replicated' ])
+      })
   })
 })

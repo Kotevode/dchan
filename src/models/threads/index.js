@@ -1,11 +1,21 @@
-import { apply, all, put, call, actionChannel, take } from 'redux-saga/effects'
+import {
+  apply,
+  all,
+  put,
+  fork,
+  call,
+  actionChannel,
+  take,
+  cancel
+} from 'redux-saga/effects'
 import { async, createTypes, actionCreator } from 'redux-action-creator'
 
 // Types
 
 export const types = createTypes([
   ...async('OPEN_THREAD'),
-  ...async('ADD_POST')
+  ...async('ADD_POST'),
+  ...async('CLOSE_THREAD')
 ])
 
 // Actions
@@ -15,7 +25,9 @@ export const actions = {
   openThreadSuccess: actionCreator(types.OPEN_THREAD_SUCCESS, 'address'),
   addPost: actionCreator(types.ADD_POST, 'post'),
   addPostSuccess: actionCreator(types.ADD_POST_SUCCESS, 'hash', 'address'),
-  addPostFail: actionCreator(types.ADD_POST_FAIL, 'error')
+  addPostFail: actionCreator(types.ADD_POST_FAIL, 'error'),
+  closeThread: actionCreator(types.CLOSE_THREAD),
+  closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS)
 }
 
 // Sagas
@@ -71,5 +83,9 @@ export function* openThread(orbitdb, { payload: { address }}) {
   ])
   yield call(loadThread, thread)
   yield put(actions.openThreadSuccess(address))
-  yield call(serveThread, thread)
+  let serving = yield fork(serveThread, thread)
+  yield take(types.CLOSE_THREAD)
+  yield cancel(serving)
+  yield apply(thread, thread.close)
+  yield put(actions.closeThreadSuccess())
 }

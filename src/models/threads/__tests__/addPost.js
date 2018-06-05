@@ -45,7 +45,9 @@ describe("threads#addPost", () => {
     const error = new Error("WTF")
 
     beforeAll(() => {
-      thread.add = () => { throw error }
+      thread.add.mockImplementation(() => {
+        throw error
+      })
     });
 
     it("dispatches error", () => {

@@ -42,7 +42,8 @@ describe('threads#openThread', () => {
           posts: [],
           closed: false,
           address
-        }
+        },
+        byName: {}
       })
       .put(actions.openThreadSuccess(address))
       .silentRun()
@@ -53,7 +54,7 @@ describe('threads#openThread', () => {
 
   it('loads a thread', () => {
     return expectSaga(openThread, orbitdb, action)
-      .call(loadThread, thread)
+      .apply(thread, thread.load)
       .silentRun()
   })
 
@@ -66,7 +67,8 @@ describe('threads#openThread', () => {
           posts: [],
           closed: true,
           address
-        }
+        },
+        byName: {}
       })
       .put(actions.closeThreadSuccess(address))
       .apply(thread, thread.close)

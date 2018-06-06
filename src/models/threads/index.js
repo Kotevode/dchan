@@ -8,6 +8,7 @@ import {
   take,
   cancel
 } from 'redux-saga/effects'
+import { eventChannel } from 'redux-saga'
 import { async, createTypes, actionCreator } from 'redux-action-creator'
 
 // Types
@@ -16,7 +17,7 @@ export const types = createTypes([
   ...async('OPEN_THREAD'),
   ...async('ADD_POST'),
   ...async('CLOSE_THREAD'),
-  ...async('CREATE_THREAD')
+  ...async('CREATE_THREAD'),
 ])
 
 // Actions
@@ -32,7 +33,7 @@ export const actions = {
   addPostSuccess: actionCreator(types.ADD_POST_SUCCESS, 'hash', 'address'),
   addPostFail: actionCreator(types.ADD_POST_FAIL, 'error'),
   closeThread: actionCreator(types.CLOSE_THREAD, 'address'),
-  closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS, 'address')
+  closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS, 'address'),
 }
 
 // Reducers
@@ -114,10 +115,6 @@ const createParams = {
   write: [ '*' ]
 }
 
-export function updateThread() {
-
-}
-
 const dbEvents = [
   'ready',
   'write',
@@ -142,8 +139,34 @@ export function *watchAddPost(thread) {
   }
 }
 
+export function* updateThread(thread){
+  let posts = thread.iterator({ limit: -1 })
+    .collect()
+}
+
+const createEventChannel = thread => eventChannel(emitter => {
+  thread.events.on('write', (dbname, hash, entry) => {
+    emitter('write')
+  })
+  return () => {
+    thread.events.removeAllListeners()
+  }
+})
+
+export function *watchUpdate(thread, eventChan) {
+  try {
+    while (true) {
+      yield take(eventChan)
+      yield call(updateThread, thread)
+    }
+  } finally {
+  }
+}
+
 export function* watchAll(thread) {
+  const eventChan = yield call(createEventChannel, thread)
   yield all ([
+    watchUpdate(thread, eventChan),
     watchAddPost(thread)
   ])
 }
@@ -160,15 +183,9 @@ export function* serveThread(thread) {
   yield put(actions.closeThreadSuccess(address))
 }
 
-export function* loadThread(thread) {
-  dbEvents.forEach(event => {
-    thread.events.on(event, () => updateThread(thread))
-  })
+export function* loadAndServe(thread) {
   yield apply(thread, thread.load)
-}
-
-export function* loadAndServe() {
-
+  yield fork(serveThread, thread)
 }
 
 export function* openThread(orbitdb, { payload: { address }}) {
@@ -176,9 +193,8 @@ export function* openThread(orbitdb, { payload: { address }}) {
     let thread = yield apply(orbitdb, orbitdb.open, [
       address, openParams
     ])
-    yield call(loadThread, thread)
+    yield call(loadAndServe, thread)
     yield put(actions.openThreadSuccess(address))
-    yield fork(serveThread, thread)
   } catch (error) {
     yield put(actions.openThreadFail(address, error))
   }
@@ -190,9 +206,8 @@ export function* createThread(orbitdb, { payload: { name }}) {
     let thread = yield apply(orbitdb, orbitdb.open, [
       name, createParams
     ])
-    yield call(loadThread, thread)
+    yield call(loadAndServe)
     yield put(actions.createThreadSuccess(name, thread.address.toString()))
-    yield fork(serveThread, thread)
   } catch (error) {
     yield put(actions.createThreadFail(name, error))
   }

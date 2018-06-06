@@ -42,7 +42,7 @@ describe("threads#addPost", () => {
           }
         })
         .dispatch(action)
-        .run()
+        .silentRun()
     })
   })
 
@@ -64,7 +64,7 @@ describe("threads#addPost", () => {
           }
         })
         .dispatch(action)
-        .run()
+        .silentRun()
     })
   })
 })

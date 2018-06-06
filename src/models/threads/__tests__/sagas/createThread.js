@@ -41,7 +41,7 @@ describe('threads#createThread', () => {
         }
       })
       .put(actions.createThreadSuccess(nameUri, address))
-      .run()
+      .silentRun()
       .then(() => {
         expect(orbitdb.open).toBeCalledWith(
           nameUri, {
@@ -57,14 +57,14 @@ describe('threads#createThread', () => {
 
   it('loads thread', () => {
     return expectSaga(createThread, orbitdb, actions.createThread(name))
-      .call(loadThread, thread)
-      .run()
+      .apply(thread, thread.load)
+      .silentRun()
   })
 
   it('starts serving', () => {
     return expectSaga(createThread, orbitdb, actions.createThread(name))
       .fork(serveThread, thread)
-      .run()
+      .silentRun()
   })
 
   describe('when creation fails', () => {

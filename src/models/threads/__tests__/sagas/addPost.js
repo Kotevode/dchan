@@ -1,7 +1,8 @@
+import OrbitDB from 'orbit-db'
 import FeedStore from 'orbit-db-feedstore'
 import { expectSaga } from 'redux-saga-test-plan'
 
-import { actions, types, addPost } from '../../'
+import { actions, types, openThread } from '../../'
 
 jest.mock('orbit-db-feedstore')
 
@@ -12,24 +13,27 @@ const action = actions.addPost({
 })
 
 let thread = new FeedStore()
+let orbitdb = new OrbitDB()
 
 describe("threads#addPost", () => {
   beforeEach(() => {
     jest.clearAllMocks()
     thread.address = {
-      toString: jest.fn().mockReturnValue(address)
+      toString: jest.fn().mockReturnValue(address),
     }
+    thread.events = {
+      on: jest.fn()
+    }
+    orbitdb.open.mockReturnValue(Promise.resolve(thread))
   });
 
   describe("when post success", () => {
     beforeAll(() => {
-      thread.add.mockReturnValue(
-        Promise.resolve(hash)
-      )
+      thread.add.mockReturnValue(Promise.resolve(hash))
     });
 
     it("dispatches success", () => {
-      return expectSaga(addPost, thread, action)
+      return expectSaga(openThread, orbitdb, actions.openThread(address))
         .put({
           type: 'ADD_POST_SUCCESS',
           payload: {
@@ -37,6 +41,7 @@ describe("threads#addPost", () => {
             address,
           }
         })
+        .dispatch(action)
         .run()
     })
   })
@@ -51,13 +56,14 @@ describe("threads#addPost", () => {
     });
 
     it("dispatches error", () => {
-      return expectSaga(addPost, thread, action)
+      return expectSaga(openThread, orbitdb, actions.openThread(address))
         .put({
           type: 'ADD_POST_FAIL',
           payload: {
             error
           }
         })
+        .dispatch(action)
         .run()
     })
   })

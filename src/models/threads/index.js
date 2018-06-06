@@ -120,7 +120,7 @@ export function* watchAll(thread) {
 }
 
 export function* serveThread(thread) {
-  let watchSaga = yield fork(watchAll)
+  let watchSaga = yield fork(watchAll, thread)
   yield take(action => (
     action.type === types.CLOSE_THREAD &&
     action.payload.address === thread.address

@@ -1,7 +1,7 @@
 import FeedStore from 'orbit-db-feedstore'
 import { expectSaga } from 'redux-saga-test-plan'
 
-import { actions, types, addPost } from '../'
+import { actions, types, addPost } from '../../'
 
 jest.mock('orbit-db-feedstore')
 

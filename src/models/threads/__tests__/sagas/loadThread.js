@@ -2,7 +2,7 @@ import { apply } from 'redux-saga/effects'
 import { expectSaga } from 'redux-saga-test-plan'
 import FeedStore from 'orbit-db-feedstore'
 
-import { loadThread } from '../'
+import { loadThread } from '../../'
 
 jest.mock('orbit-db-feedstore')
 

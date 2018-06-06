@@ -23,11 +23,60 @@ export const types = createTypes([
 export const actions = {
   openThread: actionCreator(types.OPEN_THREAD, 'address'),
   openThreadSuccess: actionCreator(types.OPEN_THREAD_SUCCESS, 'address'),
+  openThreadFail: actionCreator(types.OPEN_THREAD_FAIL, 'address', 'error'),
   addPost: actionCreator(types.ADD_POST, 'post'),
   addPostSuccess: actionCreator(types.ADD_POST_SUCCESS, 'hash', 'address'),
   addPostFail: actionCreator(types.ADD_POST_FAIL, 'error'),
-  closeThread: actionCreator(types.CLOSE_THREAD),
-  closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS)
+  closeThread: actionCreator(types.CLOSE_THREAD, 'address'),
+  closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS, 'address')
+}
+
+// Reducers
+
+export const threads = (state = {}, action) => {
+  if (!action.payload)
+    return state
+  let { address } = action.payload
+  switch (action.type) {
+    case types.OPEN_THREAD:
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          isLoading: true
+        }
+      }
+    case types.OPEN_THREAD_FAIL:
+    let { error } = action.payload
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          isLoading: false,
+          error: error
+        }
+      }
+    case types.OPEN_THREAD_SUCCESS:
+      return {
+        ...state,
+        [address]: {
+          address,
+          isLoading: false,
+          posts: [],
+          closed: false
+        }
+      }
+    case types.CLOSE_THREAD_SUCCESS:
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          closed: true
+        }
+      }
+    default:
+      return state
+  }
 }
 
 // Sagas
@@ -64,10 +113,21 @@ export function *watchAddPost(thread) {
   }
 }
 
-export function* serveThread(thread) {
-  yield all([
+export function* watchAll(thread) {
+  yield all ([
     watchAddPost(thread)
   ])
+}
+
+export function* serveThread(thread) {
+  let watchSaga = yield fork(watchAll)
+  yield take(action => (
+    action.type === types.CLOSE_THREAD &&
+    action.payload.address === thread.address
+  ))
+  yield cancel(watchSaga)
+  yield apply(thread, thread.close)
+  yield put(actions.closeThreadSuccess(thread.address))
 }
 
 export function* loadThread(thread) {
@@ -78,14 +138,14 @@ export function* loadThread(thread) {
 }
 
 export function* openThread(orbitdb, { payload: { address }}) {
-  const thread = yield apply(orbitdb, orbitdb.open, [
-    address, openParams
-  ])
-  yield call(loadThread, thread)
-  yield put(actions.openThreadSuccess(address))
-  let serving = yield fork(serveThread, thread)
-  yield take(types.CLOSE_THREAD)
-  yield cancel(serving)
-  yield apply(thread, thread.close)
-  yield put(actions.closeThreadSuccess())
+  try {
+    let thread = yield apply(orbitdb, orbitdb.open, [
+      address, openParams
+    ])
+    yield call(loadThread, thread)
+    yield put(actions.openThreadSuccess(address))
+    let serving = yield fork(serveThread, thread)
+  } catch (error) {
+    yield put(actions.openThreadFail(address, error))
+  }
 }

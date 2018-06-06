@@ -183,17 +183,13 @@ export function* serveThread(thread) {
   yield put(actions.closeThreadSuccess(address))
 }
 
-export function* loadAndServe(thread) {
-  yield apply(thread, thread.load)
-  yield fork(serveThread, thread)
-}
-
 export function* openThread(orbitdb, { payload: { address }}) {
   try {
     let thread = yield apply(orbitdb, orbitdb.open, [
       address, openParams
     ])
-    yield call(loadAndServe, thread)
+    yield apply(thread, thread.load)
+    yield fork(serveThread, thread)
     yield put(actions.openThreadSuccess(address))
   } catch (error) {
     yield put(actions.openThreadFail(address, error))
@@ -206,7 +202,8 @@ export function* createThread(orbitdb, { payload: { name }}) {
     let thread = yield apply(orbitdb, orbitdb.open, [
       name, createParams
     ])
-    yield call(loadAndServe)
+    yield apply(thread, thread.load)
+    yield fork(serveThread, thread)
     yield put(actions.createThreadSuccess(name, thread.address.toString()))
   } catch (error) {
     yield put(actions.createThreadFail(name, error))

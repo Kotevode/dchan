@@ -7,7 +7,7 @@ import { serveThread, updateThread, actions } from '../..'
 jest.mock('orbit-db-feedstore')
 let thread = new FeedStore()
 
-describe('threads#updateThread', () => {
+describe('threads#serveThread', () => {
   beforeEach(() => {
     jest.clearAllMocks()
     thread.address = {

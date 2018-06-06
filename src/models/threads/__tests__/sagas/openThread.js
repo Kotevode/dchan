@@ -27,7 +27,9 @@ describe('threads#openThread', () => {
     thread.events = {
       on: jest.fn(),
     }
-    thread.address = address
+    thread.address = {
+      toString: jest.fn().mockReturnValue(address)
+    }
     orbitdb.open.mockReturnValue(Promise.resolve(thread))
   });
 
@@ -88,16 +90,19 @@ describe('threads#openThread', () => {
     it("doesn't crash", async () => {
       const { storeState } = await expectSaga(openThread, orbitdb, action)
         .withReducer(threads)
-        .put({
-          type: 'OPEN_THREAD_FAIL',
-          payload: {
-            address,
-            error
-          }
-        })
+        .put(actions.openThreadFail(address, error))
         .run()
 
       expect(storeState[address].error).toEqual(error)
     })
+  })
+
+  it('creates thread from name', () => {
+    let name = "asdf"
+    let action = actions.createThread(name)
+
+    expectSaga(openThread, orbitdb, action)
+      .put(actions.openThreadSuccess(address))
+      .run()
   })
 })

@@ -126,7 +126,7 @@ const createParams = {
   write: [ '*' ]
 }
 
-const dbEvents = [
+export const dbEvents = [
   'ready',
   'write',
   'replicated'
@@ -202,7 +202,6 @@ export function* openThread(orbitdb, { payload: { address }}) {
     let thread = yield apply(orbitdb, orbitdb.open, [
       address, openParams
     ])
-    yield apply(thread, thread.load)
     yield fork(serveThread, thread)
     yield put(actions.openThreadSuccess(address))
   } catch (error) {
@@ -216,11 +215,11 @@ export function* createThread(orbitdb, { payload: { name, post }}) {
     let thread = yield apply(orbitdb, orbitdb.open, [
       name, createParams
     ])
+    yield fork(serveThread, thread)
     yield apply(thread, thread.load)
     if (post) {
       yield apply(thread, thread.add, [ post ])
     }
-    yield fork(serveThread, thread)
     yield put(actions.createThreadSuccess(name, thread.address.toString()))
   } catch (error) {
     yield put(actions.createThreadFail(name, error))

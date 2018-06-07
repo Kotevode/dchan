@@ -55,6 +55,20 @@ describe('threads#createThread', () => {
       })
   })
 
+  it('adds post if it exists in action payload', () => {
+    let post = {
+      title: name,
+      text: 'Some text'
+    }
+    let action = actions.createThread(name, post)
+
+    return expectSaga(createThread, orbitdb, action)
+      .silentRun()
+      .then(() => {
+        expect(thread.add).toBeCalledWith(post)
+      })
+  })
+
   it('loads thread', () => {
     return expectSaga(createThread, orbitdb, actions.createThread(name))
       .apply(thread, thread.load)

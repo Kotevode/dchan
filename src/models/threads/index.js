@@ -23,7 +23,7 @@ export const types = createTypes([
 // Actions
 
 export const actions = {
-  createThread: actionCreator(types.CREATE_THREAD, 'name'),
+  createThread: actionCreator(types.CREATE_THREAD, 'name', 'post'),
   createThreadSuccess: actionCreator(types.CREATE_THREAD_SUCCESS, 'name', 'address'),
   createThreadFail: actionCreator(types.CREATE_THREAD_FAIL, 'name', 'error'),
   openThread: actionCreator(types.OPEN_THREAD, 'address'),
@@ -196,13 +196,16 @@ export function* openThread(orbitdb, { payload: { address }}) {
   }
 }
 
-export function* createThread(orbitdb, { payload: { name }}) {
+export function* createThread(orbitdb, { payload: { name, post }}) {
   try {
     name = encodeURIComponent(name)
     let thread = yield apply(orbitdb, orbitdb.open, [
       name, createParams
     ])
     yield apply(thread, thread.load)
+    if (post) {
+      yield apply(thread, thread.add, [ post ])
+    }
     yield fork(serveThread, thread)
     yield put(actions.createThreadSuccess(name, thread.address.toString()))
   } catch (error) {

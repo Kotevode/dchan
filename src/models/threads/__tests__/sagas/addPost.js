@@ -8,9 +8,10 @@ jest.mock('orbit-db-feedstore')
 
 const hash = "some_hash"
 const address = "some_address"
-const action = actions.addPost({
+const post = {
   text: "FooBar"
-})
+}
+const action = actions.addPost(post)
 
 let thread = new FeedStore()
 let orbitdb = new OrbitDB()
@@ -43,6 +44,15 @@ describe("threads#addPost", () => {
         })
         .dispatch(action)
         .silentRun()
+    })
+
+    it("adds post to thread db", () => {
+      return expectSaga(openThread, orbitdb, actions.openThread(address))
+        .dispatch(action)
+        .silentRun()
+        .then(() => {
+          expect(thread.add).toBeCalledWith(post)
+        })
     })
   })
 

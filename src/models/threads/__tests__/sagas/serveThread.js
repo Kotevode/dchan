@@ -2,10 +2,11 @@ import { expectSaga } from 'redux-saga-test-plan'
 import EventEmitter from 'events'
 import FeedStore from 'orbit-db-feedstore'
 
-import { serveThread, updateThread, actions } from '../..'
+import { serveThread, updateThread, actions, threads } from '../..'
 
 jest.mock('orbit-db-feedstore')
 let thread = new FeedStore()
+let initialState = threads(undefined, actions.openThreadSuccess('some_address'))
 
 describe('threads#serveThread', () => {
   beforeEach(() => {
@@ -16,26 +17,48 @@ describe('threads#serveThread', () => {
   });
 
   describe('when thread emits an event', () => {
+    const post = { text: 'FooBar' }
+
     beforeEach(() => {
       thread.events = new EventEmitter()
       thread.add.mockImplementation(() => {
-        thread.events.emit('write', 'some_name', 'some_hash', 'some_entry')
+        thread.events.emit('ready')
+        thread.events.emit('replicated')
+        thread.events.emit('write')
       })
       thread.iterator.mockReturnValue({
-        collect: jest.fn().mockReturnValue([])
+        collect: jest.fn()
+        .mockReturnValue([])
+        .mockReturnValue([])
+        .mockReturnValue([ post ])
       })
     });
 
     it('collects posts from db', () => {
       return expectSaga(serveThread, thread)
-        .dispatch(actions.addPost({
-          text: 'FooBar'
-        }))
+        .dispatch(actions.addPost(post))
         .silentRun()
         .then(() => {
+          expect(thread.iterator.mock.calls.length).toEqual(3)
           expect(thread.iterator).toBeCalledWith({ limit: -1 })
-          expect(thread.iterator().collect).toBeCalled()
+          expect(thread.iterator().collect.mock.calls.length).toEqual(3)
         })
+    })
+
+    it('adds posts to store', () => {
+      return expectSaga(serveThread, thread)
+        .hasFinalState({
+          ['some_address']: {
+            isLoading: false,
+            closed: false,
+            posts: [ post ],
+            address: 'some_address'
+          },
+          byName: {}
+        })
+        .withReducer(threads, initialState)
+        .dispatch(actions.addPost(post))
+        .silentRun()
     })
   })
 })

@@ -18,6 +18,7 @@ export const types = createTypes([
   ...async('ADD_POST'),
   ...async('CLOSE_THREAD'),
   ...async('CREATE_THREAD'),
+  'RECEIVED_POSTS'
 ])
 
 // Actions
@@ -34,6 +35,7 @@ export const actions = {
   addPostFail: actionCreator(types.ADD_POST_FAIL, 'error'),
   closeThread: actionCreator(types.CLOSE_THREAD, 'address'),
   closeThreadSuccess: actionCreator(types.CLOSE_THREAD_SUCCESS, 'address'),
+  threadUpdated: actionCreator(types.RECEIVED_POSTS, 'address', 'posts')
 }
 
 // Reducers
@@ -96,6 +98,15 @@ export const threads = (state = {
           closed: true
         }
       }
+    case types.RECEIVED_POSTS:
+      let { posts } = action.payload
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          posts: posts
+        }
+      }
     default:
       return state
   }
@@ -142,11 +153,14 @@ export function *watchAddPost(thread) {
 export function* updateThread(thread){
   let posts = thread.iterator({ limit: -1 })
     .collect()
+  yield put(actions.threadUpdated(`${thread.address}`, posts))
 }
 
 const createEventChannel = thread => eventChannel(emitter => {
-  thread.events.on('write', (dbname, hash, entry) => {
-    emitter('write')
+  dbEvents.forEach(event => {
+    thread.events.on(event, () => {
+      emitter(event)
+    })
   })
   return () => {
     thread.events.removeAllListeners()

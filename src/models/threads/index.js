@@ -30,7 +30,7 @@ export const actions = {
   openThread: actionCreator(types.OPEN_THREAD, 'address'),
   openThreadSuccess: actionCreator(types.OPEN_THREAD_SUCCESS, 'address'),
   openThreadFail: actionCreator(types.OPEN_THREAD_FAIL, 'address', 'error'),
-  addPost: actionCreator(types.ADD_POST, 'post'),
+  addPost: actionCreator(types.ADD_POST, 'address', 'post'),
   addPostSuccess: actionCreator(types.ADD_POST_SUCCESS, 'hash', 'address'),
   addPostFail: actionCreator(types.ADD_POST_FAIL, 'error'),
   closeThread: actionCreator(types.CLOSE_THREAD, 'address'),
@@ -132,7 +132,6 @@ export const threadsView = (state = {
 
 const openParams = {
   sync: true,
-  create: false
 }
 
 const createParams = {
@@ -160,7 +159,10 @@ export function* addPost(thread, { payload: { post }}) {
 }
 
 export function *watchAddPost(thread) {
-  const requestChan = yield actionChannel(types.ADD_POST)
+  const requestChan = yield actionChannel(action => (
+    action.type === types.ADD_POST &&
+    action.payload.address === `${thread.address}`
+  ))
   while (true) {
     let action = yield take(requestChan)
     yield call(addPost, thread, action)
@@ -216,14 +218,11 @@ export function* serveThread(thread) {
 
 export function* openThread(orbitdb, { payload: { address }}) {
   try {
-    debugger
     let thread = yield apply(orbitdb, orbitdb.open, [
       address, openParams
     ])
     yield fork(serveThread, thread)
-    debugger
     yield apply(thread, thread.load)
-    debugger
     yield put(actions.openThreadSuccess(address))
   } catch (error) {
     yield put(actions.openThreadFail(address, error))

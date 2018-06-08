@@ -11,7 +11,7 @@ const address = "some_address"
 const post = {
   text: "FooBar"
 }
-const action = actions.addPost(post)
+const action = actions.addPost(address, post)
 
 let thread = new FeedStore()
 let orbitdb = new OrbitDB()
@@ -26,7 +26,18 @@ describe("threads#addPost", () => {
       on: jest.fn()
     }
     orbitdb.open.mockReturnValue(Promise.resolve(thread))
-  });
+  })
+
+  describe("when address doesn't match", () => {
+    it("doesn't add posts to db", () => {
+      return expectSaga(openThread, orbitdb, actions.openThread(address))
+        .dispatch(actions.addPost('some_other_address', post))
+        .silentRun()
+        .then(() => {
+          expect(thread.add).not.toBeCalled()
+        })
+    })
+  })
 
   describe("when post success", () => {
     beforeAll(() => {

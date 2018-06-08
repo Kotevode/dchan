@@ -19,6 +19,13 @@ export default class Thread extends Component {
         </button>
         <OpenForm onSubmit={this.props.openThread}/>
         <PostForm onSubmit={this.props.send}/>
+        <div className="posts">
+          { this.props.posts.map(post => (
+            <div className="post" key={post.hash}>
+              { post.payload.value.text }
+            </div>
+          )) }
+        </div>
       </main>
     )
   }

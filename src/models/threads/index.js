@@ -112,10 +112,27 @@ export const threads = (state = {
   }
 }
 
+export const threadsView = (state = {
+  selectedThread: null
+}, action) => {
+  switch (action.type) {
+    case types.OPEN_THREAD_SUCCESS:
+    case types.CREATE_THREAD_SUCCESS:
+      let { address } = action.payload
+      return {
+        ...state,
+        selectedThread: address
+      }
+    default:
+      return state
+  }
+}
+
 // Sagas
 
 const openParams = {
-  sync: true
+  sync: true,
+  create: false
 }
 
 const createParams = {
@@ -199,10 +216,14 @@ export function* serveThread(thread) {
 
 export function* openThread(orbitdb, { payload: { address }}) {
   try {
+    debugger
     let thread = yield apply(orbitdb, orbitdb.open, [
       address, openParams
     ])
     yield fork(serveThread, thread)
+    debugger
+    yield apply(thread, thread.load)
+    debugger
     yield put(actions.openThreadSuccess(address))
   } catch (error) {
     yield put(actions.openThreadFail(address, error))

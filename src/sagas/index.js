@@ -1,77 +1,27 @@
-import { take, all, apply, put } from 'redux-saga/effects'
+import { takeEvery, take, put, all } from 'redux-saga/effects'
 import OrbitDB from 'orbit-db'
+import OrbitDbAddress from 'orbit-db/src/orbit-db-address'
 
 import store from '../store'
-import { types } from '../actions'
-import Thread , { actions } from '../models/Thread'
+import actions, { types } from '../actions'
+import { types as threadTypes, createThread, openThread } from '../models/threads'
 
-
-export function* openThread(orbitdb, { address }) {
-
+export function* watchCreateThread(orbit) {
+  yield takeEvery(threadTypes.CREATE_THREAD, createThread, orbit)
 }
 
-export function* createThread(orbitdb, { name }) {
-  let thread = new Thread(store, orbitdb)
-  yield apply(thread, thread.init, [ name ])
-  var closed = false
-  while (!closed) {
-    let action = yield take([
-      actions.types.THREAD_UPDATED,
-      actions.types.CLOSE_THREAD,
-      actions.types.POST
-    ])
-    debugger
-
-    switch (action.type) {
-      case actions.types.CLOSE_THREAD:
-        thread.close()
-        closed = true
-        break
-      case actions.types.THREAD_UPDATED:
-        console.log("Thread updated")
-        break
-      case actions.types.POST:
-        let { post } = action.payload
-        yield apply(thread, thread.post, [ post ])
-        break
-      default:
-        throw 'WTF'
-    }
-
-  }
+export function* watchOpenThread(orbit) {
+  yield takeEvery(threadTypes.OPEN_THREAD, openThread, orbit)
 }
 
-export function* threadSaga() {
-  console.log("Waiting for orbit")
+export default function* rootSaga() {
   let { payload: ipfs } = yield take(types.INIT_IPFS_SUCCESS)
-  console.log(ipfs)
   const orbitdb = new OrbitDB(ipfs)
   yield put({
     type: types.INIT_ORBIT_SUCCESS
   })
-  while(true) {
-    let action = yield take([
-      types.OPEN_THREAD,
-      types.CREATE_THREAD,
-    ])
-
-    debugger
-
-    switch (action.type) {
-      case types.OPEN_THREAD:
-        yield* openThread(orbitdb, action.payload)
-        break
-      case types.CREATE_THREAD:
-        yield* createThread(orbitdb, action.payload)
-        break
-      default:
-        throw 'How the fuck did you passed it?!?!?!?!'
-    }
-  }
-}
-
- export default function* rootSaga() {
-   yield all([
-     threadSaga()
-   ])
+  yield all([
+    watchOpenThread(orbitdb),
+    watchCreateThread(orbitdb)
+  ])
  }

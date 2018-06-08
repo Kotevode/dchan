@@ -2,8 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import IPFS from 'ipfs'
 import { Provider } from 'react-redux'
-import OrbitDB from 'orbit-db'
-// import 'orbit-db/dist/orbit-db.min.js'
 
 import App from './App'
 import { types } from './actions'

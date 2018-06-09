@@ -1,5 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
+import 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.css';
 import IPFS from 'ipfs'
 import { Provider } from 'react-redux'
 

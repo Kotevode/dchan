@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import {
   Container,
   Row,
@@ -16,11 +16,11 @@ export default () => (
     <Row>
       <Col>
         <Navbar color="clear" light expand="md" className="px-0">
-          <NavbarBrand href="/">dchan</NavbarBrand>
+          <NavLink to="/" className="navbar-brand">dchan</NavLink>
           <Collapse isOpen={true} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <Link to="/threads/new">Create thread</Link>
+                <NavLink to="/threads/new">Create thread</NavLink>
               </NavItem>
             </Nav>
           </Collapse>

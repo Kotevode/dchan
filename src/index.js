@@ -7,7 +7,6 @@ import { Provider } from 'react-redux'
 import { HashRouter } from 'react-router-dom'
 
 import App from './App'
-import Navbar from './components/Navbar'
 import { types } from './actions'
 import store from './store'
 import ipfsConfig from './ipfsConfig'
@@ -23,11 +22,9 @@ ipfs.on('ready', () => {
 
 ReactDOM.render(
   <Provider store={store}>
-    <App>
-      <HashRouter>
-        <Navbar/>
-      </HashRouter>
-    </App>
+    <HashRouter>
+      <App/>
+    </HashRouter>
   </Provider>,
   document.getElementById('root')
 );

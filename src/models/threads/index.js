@@ -142,12 +142,6 @@ const createParams = {
   write: [ '*' ]
 }
 
-export const dbEvents = [
-  'ready',
-  'write',
-  'replicated'
-]
-
 export function* addPost(thread, { payload: { post }}) {
   try {
     let hash = yield apply(thread, thread.add, [ post ])
@@ -174,6 +168,12 @@ export function* updateThread(thread){
     .collect()
   yield put(actions.threadUpdated(`${thread.address}`, posts))
 }
+
+export const dbEvents = [
+  'ready',
+  'write',
+  'replicated'
+]
 
 const createEventChannel = thread => eventChannel(emitter => {
   dbEvents.forEach(event => {

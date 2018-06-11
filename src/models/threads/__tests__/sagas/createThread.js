@@ -31,7 +31,6 @@ describe('threads#createThread', () => {
       .withReducer(threads)
       .hasFinalState({
         [address]: {
-          posts: [],
           address
         },
         byName: {

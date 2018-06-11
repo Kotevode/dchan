@@ -18,9 +18,18 @@ const mapStateToProps = (state, props) => {
   }
   console.log(thread)
   let posts = thread.posts || []
+  let initialPost = posts.length > 0 ? posts[0] : {
+    payload: {
+      value: {
+        topic: 'A new thread',
+        text: 'Hello world'
+      }
+    }
+  }
   return {
     thread,
     posts,
+    initialPost,
     isLoading: threadView.isLoading
   }
 }

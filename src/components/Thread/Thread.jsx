@@ -3,6 +3,7 @@ import { Container, Row, Col } from 'reactstrap'
 
 import Loader from './Loader'
 import PostForm from './PostForm'
+import Post from './Post'
 
 export default class Thread extends Component {
   componentDidMount() {
@@ -19,23 +20,34 @@ export default class Thread extends Component {
     return (
       <Loader isLoading={this.props.isLoading}>
         <Container>
-          <Row>
+          <Row className="mb-3">
             <Col>
-              {this.props.thread.address}
+              <h2>{this.props.initialPost.payload.value.topic}</h2>
+              <small>{this.props.thread.address}</small>
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col>
+              {this.props.initialPost.payload.value.text}
             </Col>
           </Row>
           <Row>
             <Col>
-              <PostForm onSubmit={this.props.send}/>
-            </Col>
-          </Row>
-          <Row>
-            <Col>
-              { this.props.posts.map(post => (
-                <div className="post" key={post.hash}>
-                  { post.payload.value.text }
+              { this.props.posts.slice(1).map(post => (
+                <div className="mb-3" key={post.hash}>
+                  <Post post={post}/>
                 </div>
               )) }
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col>
+              <hr/>
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col>
+              <PostForm onSubmit={this.props.send}/>
             </Col>
           </Row>
         </Container>

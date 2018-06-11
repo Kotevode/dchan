@@ -1,32 +1,45 @@
 import React , { Component } from 'react'
+import { Container, Row, Col } from 'reactstrap'
 
+import Loader from './Loader'
 import PostForm from './PostForm'
-import OpenForm from './OpenForm'
 
 export default class Thread extends Component {
-  // componentDidMount() {
-  //   this.props.createThread(name)
-  // }
+  componentDidMount() {
+    if (this.props.thread.closed) {
+      this.props.openThread(this.props.thread.address)
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.closeThread(this.props.thread.address)
+  }
 
   render() {
     return (
-      <main>
-        <div>
-          {this.props.address}
-        </div>
-        <button onClick={() => this.props.createThread(`${Math.floor(Math.random() * 1e5)}`)}>
-          Create
-        </button>
-        <OpenForm onSubmit={this.props.openThread}/>
-        <PostForm onSubmit={this.props.send}/>
-        <div className="posts">
-          { this.props.posts.map(post => (
-            <div className="post" key={post.hash}>
-              { post.payload.value.text }
-            </div>
-          )) }
-        </div>
-      </main>
+      <Loader isLoading={this.props.thread.isLoading}>
+        <Container>
+          <Row>
+            <Col>
+              {this.props.thread.address}
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              <PostForm onSubmit={this.props.send}/>
+            </Col>
+          </Row>
+          <Row>
+            <Col>
+              { this.props.posts.map(post => (
+                <div className="post" key={post.hash}>
+                  { post.payload.value.text }
+                </div>
+              )) }
+            </Col>
+          </Row>
+        </Container>
+      </Loader>
     )
   }
 }

@@ -81,6 +81,12 @@ describe('threads#createThread', () => {
       .silentRun()
   })
 
+  it('returns address', () => {
+    return expectSaga(createThread, orbitdb, actions.createThread(name))
+      .returns(address)
+      .silentRun()
+  })
+
   describe('when creation fails', () => {
     let error = new Error('WTF')
 

@@ -3,26 +3,30 @@ import { connect } from 'react-redux'
 import Thread from '../components/Thread'
 import { actions } from '../models/threads'
 
-const selectedThread = (state) => state.views.threads.selectedThread
-const posts = (state, address) => {
-  if (state.entities.threads[address]) {
-    return state.entities.threads[address].posts
-  } else {
-    return []
+const getThread = (state, address) => state.entities.threads[address]
+
+const mapStateToProps = (state, props) => {
+  let { manifest, name } = props.match.params
+  let address = `/orbitdb/${manifest}/${name}`
+  let thread = getThread(state, address) || {
+    address,
+    isLoading: true,
+    closed: true
+  }
+  console.log(thread)
+  let posts = thread.posts || []
+  return {
+    thread,
+    posts
   }
 }
 
-const mapStateToProps = (state) => ({
-  address: selectedThread(state),
-  posts: posts(state, selectedThread(state))
-})
-
 const mergeProps = (state, { dispatch }) => {
-  let { address } = state
+  let { address } = state.thread
   return {
     ...state,
-    openThread: ({ address }) => dispatch(actions.openThread(address)),
-    createThread: (name) => dispatch(actions.createThread(name)),
+    openThread: (address) => dispatch(actions.openThread(address)),
+    closeThread: (address) => dispatch(actions.closeThread(address)),
     send: (values) => dispatch(actions.addPost(address, values))
   }
 }

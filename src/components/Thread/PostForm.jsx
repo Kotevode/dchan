@@ -1,15 +1,21 @@
 import React from 'react'
+import {
+  Form,
+  FormGroup,
+  Button
+} from 'reactstrap'
 import { reduxForm, Field } from 'redux-form'
 
 let PostForm = ({ handleSubmit }) => (
-  <form onSubmit={handleSubmit}>
-    <Field name="text"
-           component="input"
-           type="text"/>
-         <button type="submit">
-           Send
-         </button>
-  </form>
+  <Form onSubmit={handleSubmit}>
+    <FormGroup>
+      <Field name="text"
+             component="textarea"
+             className="form-control"
+             type="text"/>
+    </FormGroup>
+    <Button color="primary">Send</Button>
+  </Form>
 )
 
 PostForm = reduxForm({

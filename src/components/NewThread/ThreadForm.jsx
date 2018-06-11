@@ -18,9 +18,7 @@ let ThreadForm = ({ handleSubmit }) => (
              component="textarea"
              className="form-control"/>
     </FormGroup>
-    <FormGroup>
-      <Button>Submit</Button>
-    </FormGroup>
+    <Button color="primary">Submit</Button>
   </Form>
 )
 

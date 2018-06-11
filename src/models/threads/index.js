@@ -241,6 +241,7 @@ export function* createThread(orbitdb, { payload: { name, post }}) {
       yield apply(thread, thread.add, [ post ])
     }
     yield put(actions.createThreadSuccess(name, thread.address.toString()))
+    return yield `${thread.address}`
   } catch (error) {
     yield put(actions.createThreadFail(name, error))
   }

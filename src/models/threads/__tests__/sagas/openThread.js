@@ -10,6 +10,7 @@ import {
   serveThread,
   actions,
   threads,
+  threadsView,
 } from '../../'
 
 jest.mock('orbit-db')
@@ -33,22 +34,15 @@ describe('threads#openThread', () => {
     orbitdb.open.mockReturnValue(Promise.resolve(thread))
   });
 
-  it('opens thread from adderss', () => {
+  it('opens thread from adderss', async () => {
     return expectSaga(openThread, orbitdb, action)
       .withReducer(threads)
-      .hasFinalState({
-        [address]: {
-          isLoading: false,
-          posts: [],
-          closed: false,
-          address
-        },
-        byName: {}
-      })
       .put(actions.openThreadSuccess(address))
       .silentRun()
-      .then(() => {
+      .then(({ storeState }) => {
         expect(orbitdb.open).toBeCalledWith(address, { sync: true })
+
+        expect(storeState[address].address).toEqual(address)
       })
   })
 
@@ -60,15 +54,13 @@ describe('threads#openThread', () => {
 
   it('allows to close thread', () => {
     return expectSaga(openThread, orbitdb, action)
-      .withReducer(threads)
+      .withReducer(threadsView)
       .hasFinalState({
+        selectedThread: address,
         [address]: {
           isLoading: false,
-          posts: [],
-          closed: true,
-          address
-        },
-        byName: {}
+          isClosed: true
+        }
       })
       .put(actions.closeThreadSuccess(address))
       .apply(thread, thread.close)

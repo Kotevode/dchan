@@ -17,7 +17,7 @@ export default class Thread extends Component {
 
   render() {
     return (
-      <Loader isLoading={this.props.thread.isLoading}>
+      <Loader isLoading={this.props.isLoading}>
         <Container>
           <Row>
             <Col>

@@ -60,8 +60,6 @@ describe('threads#serveThread', () => {
       return expectSaga(openThread, orbitdb, action)
         .hasFinalState({
           ['some_address']: {
-            isLoading: false,
-            closed: false,
             posts: [ post, receivedPost ],
             address: 'some_address'
           },

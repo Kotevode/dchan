@@ -47,27 +47,25 @@ export const threads = (state = {
     return state
   let { address } = action.payload
   switch (action.type) {
-    case types.OPEN_THREAD:
-      return {
-        ...state,
-        [address]: {
-          ...state[address],
-          isLoading: true
-        }
-      }
     case types.CREATE_THREAD_SUCCESS:
       let { name } = action.payload
       return {
         ...state,
         [address]: {
-          isLoading: false,
-          posts: [],
-          closed: false,
+          ...state[address],
           address
         },
         byName: {
           ...state.byName,
           [name]: address
+        }
+      }
+    case types.OPEN_THREAD_SUCCESS:
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          address
         }
       }
     case types.OPEN_THREAD_FAIL:
@@ -76,26 +74,7 @@ export const threads = (state = {
         ...state,
         [address]: {
           ...state[address],
-          isLoading: false,
           error: error
-        }
-      }
-    case types.OPEN_THREAD_SUCCESS:
-      return {
-        ...state,
-        [address]: {
-          address,
-          isLoading: false,
-          posts: [],
-          closed: false
-        }
-      }
-    case types.CLOSE_THREAD_SUCCESS:
-      return {
-        ...state,
-        [address]: {
-          ...state[address],
-          closed: true
         }
       }
     case types.RECEIVED_POSTS:
@@ -115,13 +94,37 @@ export const threads = (state = {
 export const threadsView = (state = {
   selectedThread: null
 }, action) => {
+  let address
   switch (action.type) {
-    case types.OPEN_THREAD_SUCCESS:
-    case types.CREATE_THREAD_SUCCESS:
-      let { address } = action.payload
+    case types.OPEN_THREAD:
+      address = action.payload.address
       return {
         ...state,
-        selectedThread: address
+        [address]: {
+          ...state[address],
+          isLoading: true,
+        }
+      }
+    case types.OPEN_THREAD_SUCCESS:
+    case types.CREATE_THREAD_SUCCESS:
+      address = action.payload.address
+      return {
+        ...state,
+        selectedThread: address,
+        [address]: {
+          ...state[address],
+          isLoading: false,
+          isClosed: false
+        }
+      }
+    case types.CLOSE_THREAD_SUCCESS:
+      address = action.payload.address
+      return {
+        ...state,
+        [address]: {
+          ...state[address],
+          isClosed: true
+        }
       }
     default:
       return state

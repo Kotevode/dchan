@@ -4,20 +4,24 @@ import Thread from '../components/Thread'
 import { actions } from '../models/threads'
 
 const getThread = (state, address) => state.entities.threads[address]
+const getThreadView = (state, address) => state.views.threads[address]
 
 const mapStateToProps = (state, props) => {
   let { manifest, name } = props.match.params
   let address = `/orbitdb/${manifest}/${name}`
   let thread = getThread(state, address) || {
     address,
-    isLoading: true,
     closed: true
+  }
+  let threadView = getThreadView(state, address) || {
+    isLoading: true
   }
   console.log(thread)
   let posts = thread.posts || []
   return {
     thread,
-    posts
+    posts,
+    isLoading: threadView.isLoading
   }
 }
 

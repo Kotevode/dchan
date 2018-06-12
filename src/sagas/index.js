@@ -6,6 +6,7 @@ import { push } from 'connected-react-router'
 import store from '../store'
 import actions, { types } from '../actions'
 import { types as threadTypes, createThread, openThread } from '../models/threads'
+import { types as mediaTypes, upload } from '../models/media'
 
 const chopAddress = (address) => {
   return address.replace("/orbitdb/", "")
@@ -25,17 +26,22 @@ export function* watchOpenThread(orbit) {
   yield takeEvery(threadTypes.OPEN_THREAD, openThread, orbit)
 }
 
-export function* watchAll(orbitdb) {
+export function* watchUploadMedia(ipfs) {
+  yield takeEvery(mediaTypes.UPLOAD_MEDIA, upload, ipfs)
+}
+
+export function* watchAll(orbitdb, ipfs) {
   yield all([
     watchOpenThread(orbitdb),
-    watchCreateThread(orbitdb)
+    watchCreateThread(orbitdb),
+    watchUploadMedia(ipfs)
   ])
 }
 
 export default function* rootSaga() {
   let { payload: ipfs } = yield take(types.INIT_IPFS_SUCCESS)
   const orbitdb = new OrbitDB(ipfs)
-  yield fork(watchAll, orbitdb)
+  yield fork(watchAll, orbitdb, ipfs)
   yield put({
     type: types.INIT_ORBIT_SUCCESS
   })

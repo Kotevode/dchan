@@ -30,7 +30,26 @@ const mapStateToProps = (state, props) => {
     thread,
     posts,
     initialPost,
-    isLoading: threadView.isLoading
+    isLoading: threadView.isLoading,
+    uploads: state.entities.uploads
+  }
+}
+
+const reattachMedia = (uploads, post) => {
+  let media = post.media.reduce((media, fileName) => {
+    if (fileName.search(/\*.(jpg|jpeg|png)/)) {
+      media.images = [
+        ...media.images,
+        uploads[fileName]
+      ]
+    }
+    return media
+  }, {
+    images: []
+  })
+  return {
+    ...post,
+    media
   }
 }
 
@@ -40,7 +59,10 @@ const mergeProps = (state, { dispatch }) => {
     ...state,
     openThread: (address) => dispatch(actions.openThread(address)),
     closeThread: (address) => dispatch(actions.closeThread(address)),
-    send: (values) => dispatch(actions.addPost(address, values))
+    send: (values) => {
+      values = reattachMedia(state.uploads, values)
+      dispatch(actions.addPost(address, values))
+    }
   }
 }
 

@@ -16,11 +16,13 @@ const orbit = (state = { isLoading: true }, action) => {
 }
 
 const entities = combineReducers({
-  threads: require('../models/threads').threads
+  threads: require('../models/threads').threads,
+  uploads: require('../models/media').uploads
 })
 
 const views = combineReducers({
-  threads: require('../models/threads').threadsView
+  threads: require('../models/threads').threadsView,
+  uploads: require('../models/media').uploads
 })
 
 export default combineReducers({

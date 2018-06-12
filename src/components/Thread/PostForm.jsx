@@ -2,9 +2,12 @@ import React from 'react'
 import {
   Form,
   FormGroup,
-  Button
+  Button,
+  Label
 } from 'reactstrap'
 import { reduxForm, Field } from 'redux-form'
+
+import MediaInput from './MediaInput'
 
 let PostForm = ({ handleSubmit }) => (
   <Form onSubmit={handleSubmit}>
@@ -13,6 +16,11 @@ let PostForm = ({ handleSubmit }) => (
              component="textarea"
              className="form-control"
              type="text"/>
+    </FormGroup>
+    <FormGroup>
+      <Label for="media">Media</Label>
+      <Field name="media"
+             component={MediaInput}/>
     </FormGroup>
     <Button color="primary">Send</Button>
   </Form>

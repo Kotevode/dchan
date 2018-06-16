@@ -20,7 +20,8 @@ let PostForm = ({ handleSubmit }) => (
     <FormGroup>
       <Label for="media">Media</Label>
       <Field name="media"
-             component={MediaInput}/>
+             component={MediaInput}
+             value={[]}/>
     </FormGroup>
     <Button color="primary">Send</Button>
   </Form>

@@ -1,13 +1,35 @@
 import React from 'react'
 import { Card, CardBody, CardHeader } from 'reactstrap'
 
-export default ({ post }) => (
+const images = (images) => (
+  <div className="images">
+    { images.map(i => (
+      <img src={`http://ipfs.io/ipfs/${i}`}
+            key={i}
+            width="300"
+            height="300"/>
+    )) }
+  </div>
+)
+
+export default ({
+  post: {
+    hash,
+    payload: {
+      value: {
+        text,
+        media
+      }
+    }
+  }
+}) => (
   <Card>
     <CardHeader>
-      <small>{ post.hash }</small>
+      <small>{ hash }</small>
     </CardHeader>
     <CardBody>
-      { post.payload.value.text}
+      { media && media.images && images(media.images) }
+      { text }
     </CardBody>
   </Card>
 )

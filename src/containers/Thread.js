@@ -60,7 +60,9 @@ const mergeProps = (state, { dispatch }) => {
     openThread: (address) => dispatch(actions.openThread(address)),
     closeThread: (address) => dispatch(actions.closeThread(address)),
     send: (values) => {
-      values = reattachMedia(state.uploads, values)
+      if (values.media) {
+        values = reattachMedia(state.uploads, values)
+      }
       dispatch(actions.addPost(address, values))
     }
   }
